@@ -1,10 +1,10 @@
-FROM registry.ci.openshift.org/ocp/builder:rhel-8-golang-1.17-openshift-4.11 AS builder
-WORKDIR /go/src/github.com/openshift/mdns-publisher
+FROM mcr.microsoft.com/devcontainers/go:1.21-bullseye AS builder
+WORKDIR /build
 COPY . .
-RUN GO111MODULE=on go build --mod=vendor
+RUN CGO_ENABLED=0 GO111MODULE=on go build --mod=vendor -o mdns-publisher
 
-FROM registry.ci.openshift.org/ocp/4.11:base
-COPY --from=builder /go/src/github.com/openshift/mdns-publisher/mdns-publisher /usr/bin/
+FROM scratch
+COPY --from=builder /build/mdns-publisher /usr/bin/
 
 ENTRYPOINT ["/usr/bin/mdns-publisher"]
 
